@@ -24,6 +24,7 @@
     import { enhance } from "$app/forms";
     import title from "$lib/title";
     import { t, locale } from "$lib/i18n";
+    import AudioActions from "$lib/components/audio_actions.svelte";
 
     export let audios: ClientsideAudio[];
     export let currentUser: ClientsideUser | null = null;
@@ -1289,8 +1290,22 @@
                 break;
             case 's':
             case 'S':
-                event.preventDefault();
-                shareAudio();
+                if (browser && currentAudio) {
+                    event.preventDefault();
+                    const nav = navigator as Navigator & {
+                        share?: (data: { url?: string; title?: string }) => Promise<void>;
+                    };
+                    const shareUrl = `${window.location.origin}/listen/${currentAudio.id}`;
+                    if (typeof nav.share === 'function') {
+                        nav.share({ url: shareUrl, title: currentAudio.title }).catch((error) => {
+                            console.error('Share failed:', error);
+                        });
+                    } else if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrl).catch((error) => {
+                            console.error('Clipboard copy failed:', error);
+                        });
+                    }
+                }
                 break;
             default:
                 console.log('🔘 Unhandled key:', event.key);
@@ -1308,41 +1323,6 @@
             }, 1000);
         }
     }
-
-    function shareAudio(target: ClientsideAudio | null | undefined = currentAudio) {
-        if (!browser) return;
-
-        const audioToShare = target ?? currentAudio;
-        if (!audioToShare) return;
-
-        const shareUrl = `${window.location.origin}/listen/${audioToShare.id}`;
-        const nav = navigator as Navigator & {
-            share?: (data: { url?: string; title?: string }) => Promise<void>;
-        };
-
-        if (typeof nav.share === 'function') {
-            nav.share({ url: shareUrl, title: audioToShare.title }).catch((error) => {
-                console.error('Share failed, falling back to clipboard:', error);
-                copyShareLink(shareUrl);
-            });
-            return;
-        }
-
-        copyShareLink(shareUrl);
-    }
-
-    function copyShareLink(url: string) {
-        const clipboard = navigator.clipboard;
-        if (clipboard?.writeText) {
-            clipboard
-                .writeText(url)
-                .then(() => announceStatus(t('audio_actions.share_copied')))
-                .catch((error) => console.error('Clipboard copy failed:', error));
-        } else {
-            console.warn('Clipboard API unavailable for sharing');
-        }
-    }
-
     function isClientsideComment(value: unknown): value is ClientsideComment {
         if (!value || typeof value !== 'object') {
             return false;
@@ -1731,43 +1711,26 @@
                     
                     <!-- Action Buttons (Right Side) -->
                     <div class="action-buttons">
-                        {#if currentUser}
+                        <div class="actions-wrapper">
+                            <AudioActions
+                                context="quickfeed"
+                                {currentUser}
+                                audioId={audio.id}
+                                audioTitle={audio.title}
+                                audioPath={audio.path}
+                                isFavorited={audio.isFavorited}
+                                favoriteCount={audio.favoriteCount}
+                                onToggleFavorite={toggleFavorite}
+                            />
+
                             <button 
-                                class="action-btn favorite-btn" 
-                                class:favorited={audio.isFavorited}
-                                on:click={() => {toggleFavorite();}}
-                                aria-label={audio.isFavorited ? t('listen.unfavorite') : t('listen.favorite')}
+                                class="comment-btn"
+                                on:click={() => openCommentsDialog(currentIndex)}
+                                aria-label={t('comments.title')}
                             >
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill={audio.isFavorited ? "#ff6b6b" : "none"} stroke="white" stroke-width="2">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                                <span>{audio.favoriteCount || 0}</span>
+                                💬
                             </button>
-                        {/if}
-                        
-                        <button 
-                            class="action-btn comment-btn"
-                            on:click={() => openCommentsDialog(currentIndex)}
-                            aria-label={t('comments.title')}
-                        >
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                            </svg>
-                        </button>
-                        
-                        <button 
-                            class="action-btn share-btn"
-                            on:click={() => shareAudio(audio)}
-                            aria-label={t('audio_actions.share')}
-                        >
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                            </svg>
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2224,41 +2187,36 @@
     .action-buttons {
         grid-area: actions;
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        align-items: center;
-        justify-content: center;
+        align-items: flex-end;
+        justify-content: flex-end;
+        padding-bottom: 1rem;
     }
 
-    .action-btn {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255, 255, 255, 0.2);
+    .actions-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    /* Style for the comment button only - AudioActions will use its own styles */
+    .comment-btn {
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.06);
         backdrop-filter: blur(10px);
         cursor: pointer;
-        display: flex;
-        flex-direction: column;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
+        gap: 0.35rem;
         transition: all 0.3s ease;
         color: white;
-        font-size: 0.7rem;
-        font-weight: 600;
+        font-size: 1rem;
     }
 
-    .action-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(1.1);
-    }
-
-    .favorite-btn.favorited {
-        background: rgba(255, 107, 107, 0.3);
-    }
-
-    .action-btn span {
-        margin-top: 0.2rem;
+    .comment-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .comments-dialog {
