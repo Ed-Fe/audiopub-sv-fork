@@ -20,63 +20,7 @@ import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { User, Audio } from "$lib/server/database";
 import { hash } from "bcrypt";
-<<<<<<< HEAD
 import { availableLocales } from "$lib/i18n";
-=======
->>>>>>> origin/main
-
-export const load: PageServerLoad = async (event) => {
-  const user = event.locals.user;
-  if (!user) {
-    return redirect(303, "/login");
-  }
-
-  const pageString = event.url.searchParams.get("page");
-  const page = pageString ? parseInt(pageString, 10) : 1;
-  const limit = 30;
-  const offset = (page - 1) * limit;
-
-  const audios = await Audio.findAndCountAll({
-    where: { userId: user.id },
-    limit,
-    offset,
-    order: [["createdAt", "DESC"]],
-  });
-
-  return {
-    name: user.name,
-    email: user.email,
-    displayName: user.displayName,
-    audios: audios.rows.map((audio) => audio.toClientside()),
-    count: audios.count,
-    page,
-    limit,
-    totalPages: Math.ceil(audios.count / limit),
-    profileUser: user.toClientside(),
-  };
-};
-
-export const actions: Actions = {
-  default: async (event) => {
-    const user = event.locals.user;
-    const data = await event.request.formData();
-    if (!user) {
-      return redirect(303, "/login");
-    }
-    let email = data.get("email") as string;
-    let displayName = data.get("displayName") as string;
-    let password = data.get("password") as string;
-<<<<<<< HEAD
-    let bio = data.get("bio") as string | null;
-    const preferredLanguagesRaw = data.getAll("preferredLanguages") as string[];
-    
-    // Validate and filter preferredLanguages
-    const LOCALE_CODES = new Set(availableLocales.map((l) => l.code));
-    const validLanguageCodes = new Set([...LOCALE_CODES, "und"]);
-    const preferredLanguages = preferredLanguagesRaw.filter((code) => validLanguageCodes.has(code));
-    
-=======
->>>>>>> origin/main
     if (email) {
       email = email.trim().toLowerCase();
       if (
@@ -113,7 +57,6 @@ export const actions: Actions = {
       user.password = await hash(password, 12);
       user.version++;
     }
-<<<<<<< HEAD
     
     // Update bio (trim and validate length)
     if (bio !== null) {
@@ -131,8 +74,6 @@ export const actions: Actions = {
     // Update preferredLanguages
     (user as any).preferredLanguages = preferredLanguages.length > 0 ? JSON.stringify(preferredLanguages) : null;
     
-=======
->>>>>>> origin/main
     await user.save();
     event.cookies.set("token", await user.generateToken(), { path: "/" });
     return redirect(303, "/");

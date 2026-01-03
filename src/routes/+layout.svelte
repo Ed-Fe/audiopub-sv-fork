@@ -17,17 +17,10 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 <script lang="ts">
-<<<<<<< HEAD
     import title from "$lib/title";
     import { onDestroy, onMount } from "svelte";
     import type { LayoutData } from "./$types";
     import { t, locale, availableLocales } from "$lib/i18n";
-=======
-    import { enhance } from "$app/forms";
-    import title from "$lib/title";
-    import { onDestroy, onMount } from "svelte";
-    import type { LayoutData } from "./$types";
->>>>>>> origin/main
 
     export let data: LayoutData;
 
@@ -104,7 +97,6 @@
     });
 </script>
 
-<<<<<<< HEAD
 <svelte:head>
     <title>{unreadCount > 0 ? `(${unreadCount}) ` : ""}{$title} | {t('title.brand')}</title></svelte:head>
 
@@ -125,37 +117,10 @@
                         <span
                             class="badge"
                             aria-label={t('notifications.unread_badge', { count: unreadCount })}
-=======
-<svelte head>
-    <title
-        >{unreadCount > 0 ? `(${unreadCount}) ` : ""}{$title} | audiopub</title
-    >
-</svelte>
-
-<header>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/quickfeed">Quickfeed</a>
-        {#if data.user}
-            {#if !data.user.isVerified}
-                <p>
-                    <b>WARNING:</b> Your account is not verified. Please verify your
-                    account to access all features.
-                </p>
-                <a href="/verify">Verify</a>
-            {:else}
-                <a href="/notifications" class="notifications-link">
-                    Notifications
-                    {#if unreadCount > 0}
-                        <span
-                            class="badge"
-                            aria-label={`${unreadCount} unread notifications`}
->>>>>>> origin/main
                             >{unreadCount}</span
                         >
                     {/if}
                 </a>
-<<<<<<< HEAD
                 <a href="/favorites">{t('nav.favorites')}</a>
                 <a href="/upload">{t('nav.upload')}</a>
                 <a href="/profile">{t('nav.profile')}</a>
@@ -182,22 +147,6 @@
             {/each}
         </select>
     </div>
-=======
-                <a href="/favorites">Favorites</a>
-                <a href="/upload">Upload</a>
-                <a href="/profile">Profile</a>
-                <a href="/logout">Logout</a>
-            {/if}
-        {:else}
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-        {/if}
-    </nav>
-    <form action="/search" method="get">
-        <input type="text" name="q" placeholder="Search..." />
-        <button type="submit">Search</button>
-    </form>
->>>>>>> origin/main
 </header>
 <main>
     <slot />
@@ -206,7 +155,6 @@
 <hr />
 <footer>
     <div class="copyright">
-<<<<<<< HEAD
         <p>{t('footer.rights')}</p>
         <p>
             {t('footer.contact')}:
@@ -216,23 +164,6 @@
         <a href="/agreement">{t('footer.agreement')}</a>
         <p>
             {t('footer.open_source')}
-=======
-        <p>
-            All rights to the audio files and associated content uploaded to
-            this platform remain with their respective creators or rightful
-            owners.
-        </p>
-        <p>
-            For inquiries regarding content ownership or usage, please contact:
-            <a href="mailto:cccefg2@gmail.com"> cccefg2@gmail.com</a>
-            I'm sorry for the unprofessional email address, I'm still working on
-            it.
-        </p>
-        <a href="/agreement">Our Agreement</a>
-        <p>
-            Audiopub is open source software. The code is licensed under the GNU
-            AFFERO GENERAL PUBLIC LICENSE. You can find the source code on
->>>>>>> origin/main
             <a href="https://github.com/the-byte-bender/audiopub-sv">GitHub</a>.
         </p>
     </div>
@@ -242,69 +173,12 @@
     header {
         background-color: #f0f0f0;
         padding: 20px;
-<<<<<<< HEAD
         display: grid;
         grid-template-columns: 1fr auto auto;
-=======
-        display: flex;
-        justify-content: space-between;
->>>>>>> origin/main
         align-items: center;
         position: sticky;
         top: 0;
         z-index: 1000;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-<<<<<<< HEAD
         gap: 1rem;
-=======
->>>>>>> origin/main
-    }
-
-    nav a {
-        margin-right: 10px;
-        text-decoration: none;
-        color: #333;
-    }
-
-    nav a:hover {
-        color: #000;
-    }
-
-    .notifications-link {
-        font-weight: 600;
-        position: relative;
-    }
-    .badge {
-        margin-left: 0.4rem;
-        background: #d00;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0 0.45rem;
-        font-size: 0.8rem;
-        line-height: 1.2rem;
-        display: inline-block;
-        min-width: 1.2rem;
-        text-align: center;
-    }
-
-    main {
-        padding: 20px;
-        /* Account for sticky header - approximate height is 80px (40px padding + ~40px content) */
-        padding-top: calc(20px + 80px);
-    }
-
-    footer {
-        background-color: #eee;
-        padding: 20px;
-        text-align: center;
-    }
-<<<<<<< HEAD
-
-    .locale-switcher {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-=======
->>>>>>> origin/main
 </style>
