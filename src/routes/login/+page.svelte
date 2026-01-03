@@ -42,7 +42,6 @@
             id="email"
             name="email"
             required
-=======
             autofocus
 >>>>>>> origin/main
             class="form-control"

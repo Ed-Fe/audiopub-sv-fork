@@ -188,7 +188,6 @@
         margin-bottom: 0.5rem;
     }
 
-=======
     /* Styling for the download link */
     .audio-player a {
         display: block;

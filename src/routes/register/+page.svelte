@@ -42,7 +42,6 @@
             id="username"
             name="username"
             required
-=======
             autofocus
 >>>>>>> origin/main
             minlength="3"
